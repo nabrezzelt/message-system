@@ -56,6 +56,34 @@
                 }
             break;
 
+            case "has-new-messages":
+                if(isset($_GET['conversation-id']) && isset($_GET['after']))
+                {                    
+                    if($_GET['after'] == "") // After ist leer -> evtl existieren noch keine nachrichten vom gegenüber
+                    {
+                        return json_encode(Message::hasNewMessagesOther($_GET['conversation-id']));
+                    }
+
+                    return json_encode(Message::hasNewMessagesAfter($_GET['conversation-id'], $_GET['after']));
+                }
+                else
+                {
+                    return json_encode(array('AJAXCode' => AJAXTypes::FAILED)); 
+                }
+            break;
+
+            case "has-new-messages-other":
+                //Wenn noch keine Nachrichten existieren vom gegenüber muss nach komplett neuen nachrichten gesucht werden welche nicht von mir sind.                
+                if(isset($_GET['conversation-id']))
+                {
+                    return json_encode(Message::hasNewMessagesOther($_GET['conversation-id']));
+                }
+                else
+                {
+                    return json_encode(array('AJAXCode' => AJAXTypes::FAILED)); 
+                }
+            break;
+
             default:
                 return json_encode(array('AJAXCode' => AJAXTypes::FAILED));
                 break;

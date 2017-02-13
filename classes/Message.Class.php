@@ -77,6 +77,28 @@
             $res = mysql_query($query)or die(Helper::SQLErrorFormat(mysql_error(), $query, __METHOD__, __FILE__, __LINE__));
         }
 
+        public static function hasNewMessagesAfter($conversationID, $after)
+        {
+            $query = "SELECT messages.id, conversationID, content, userID, users.username, createTime
+                      FROM messages
+                      JOIN users
+                      ON userID = users.id
+                      WHERE conversationID = $conversationID AND createTime > '$after' AND userID != " . unserialize($_SESSION['user'])->getID();
+            $res = mysql_query($query)or die(Helper::SQLErrorFormat(mysql_error(), $query, __METHOD__, __FILE__, __LINE__));
+            
+            return array('conversationID' => $conversationID, 'newMessages' => mysql_num_rows($res));
+        }
+
+        public function hasNewMessagesOther($conversationID)
+        {
+            $query = "SELECT *
+                      FROM messages
+                      WHERE conversationID = $conversationID AND userID != " . unserialize($_SESSION['user'])->getID();
+            $res = mysql_query($query)or die(Helper::SQLErrorFormat(mysql_error(), $query, __METHOD__, __FILE__, __LINE__));
+
+            return array('conversationID' => $conversationID, 'newMessages' => mysql_num_rows($res));
+        }
+
     }
     
 ?>

@@ -56,7 +56,7 @@
                         </div>
                         <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
                     </form> -->
-                    <p class="navbar-text logged_in_as" style="padding-left: 10px;">Logged in as <a class='user-data' data-id="<?php echo unserialize($_SESSION['user'])->getID() ?>" href="account-panel.php"><?php echo unserialize($_SESSION['user'])->getUsername() ?></a></p>
+                    <p class="navbar-text" style="padding-left: 10px;">Logged in as <a class='user-data' data-id="<?php echo unserialize($_SESSION['user'])->getID() ?>" href="#"><?php echo unserialize($_SESSION['user'])->getUsername() ?></a></p>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Menu <span class="caret"></span></a>
                         <ul class="dropdown-menu">                                                                                                                     
@@ -73,10 +73,13 @@
             
         </ul>
         <div class="tab-content">
-            <center><i class="fa fa-spinner fa-pulse fa-4x fa-fw"></i>
-                <span class="sr-only">Loading...</span></center>
+            <div class='pull-left container text-center'>
+                <i class="fa fa-spinner fa-pulse fa-4x fa-fw" style="margin-left: -15%; margin-top: 40px;"></i>
+                <span class="sr-only">Loading...</span>
+            </div>
         </div>        
     </div>
+    
 
     <!-- jQuery (wird für Bootstrap JavaScript-Plugins benötigt) -->
     <script src="js/jquery.min.js"></script>

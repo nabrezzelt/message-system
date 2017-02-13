@@ -10,7 +10,7 @@ window.setInterval(function(){
 
     //Do Sutuff for current open tab
     var currentConversationID = $("li.active a[data-toggle='tab']").data("conversation-id"); 
-    createTime = $("#conversation-" + currentConversationID + " .chat-container .other-message:last .message-data-other").text();
+    var createTime = $("#conversation-" + currentConversationID + " .chat-container .other-message:last .message-data-other").text();
 
     $.get("ajax.php?act=get-messages-after&conversation-id=" + currentConversationID + "&after=" + createTime, function (data) {
         console.log(data);
@@ -38,27 +38,74 @@ window.setInterval(function(){
  
 
     //Do stuff for all other Tabs where not active
+    $(".nav-tabs > li").each(function() {
+        if(!$(this).hasClass("active"))
+        {
+            var conversationID = $(this).children('a').data("conversation-id");
+            var createTime = $("#conversation-" + conversationID + " .chat-container .other-message:last .message-data-other").text();
+
+            var url = "ajax.php?act=has-new-messages&conversation-id=" + conversationID + "&after=" + createTime;
+            //console.log(url);
+            $.get(url, function (data) {
+                console.log(data);
+                if(data.newMessages > 0)
+                {
+                    $("a[data-conversation-id='" + data.conversationID + "'] .message-count").html("<span class='badge'>" + data.newMessages + "</span>");
+                }
+            }, 'json');
+        }
+    });
     
 
     console.log("Check for new Messages");
 }, 3000);
 
-function checkForNewMessages(conversationID)
-{
-
-}
 
 //Function do stuff on click on tab
 $(document).on('click', "a[data-toggle='tab']", function() {
     console.log("tab changed");
     var conversationID = $(this).data('conversation-id');
-    
+    $("a[data-conversation-id='" + conversationID + "'] .message-count").html(""); 
+
+    //Load Messages Directly
+    var myID = $(".user-data").data('id');
+
+    //Do Sutuff for current open tab
+    var currentConversationID = $("li.active a[data-toggle='tab']").data("conversation-id"); 
+    var createTime = $("#conversation-" + currentConversationID + " .chat-container .other-message:last .message-data-other").text();
+
+    $.get("ajax.php?act=get-messages-after&conversation-id=" + currentConversationID + "&after=" + createTime, function (data) {
+        console.log(data);
+        for (var i = 0; i < data.length; i++) 
+        {
+            var message = data[i];
+            console.log(message);   //Object { id: "91", message: "peter", user: Object, createTime: "2017-02-10 10:08:10" }
+
+            //$("#conversation-" + currentConversationID + " .chat-container").append("<div class='other-message'>" + message.message + "<div class='message-data-other text-right text-muted'><span class='glyphicon glyphicon-time'></span> 2017-02-10 10:05:26</div></div>") 
+        }
+        messages = formatMessages(data, myID);
+        console.log(messages);
+        $("#conversation-" + currentConversationID + " .chat-container").append(messages);
+
+        if(messages != "")
+        {
+            $("#conversation-" + currentConversationID + " .chat-container").animate({
+                scrollTop: $("#conversation-" + currentConversationID + " .chat-container")[0].scrollHeight },
+                1000
+            ); 
+        }   
+                                      
+    }, 'json');
 });
 
 $(document).on('keydown', 'textarea[data-conversation-id]', function (e){
-    if(e.keyCode == 13) {
+    if(e.keyCode == 13 && e.shiftKey)
+    {
+        
+    }
+    else if(e.keyCode == 13)
+    {
         var conversationID = $(this).data("conversation-id");
-
         $("button[data-conversation-id='" + conversationID + "']").trigger('click');
     }
 });
@@ -71,7 +118,7 @@ $(document).ready(function() {
             var conversation = data[i];
             console.log(conversation);
            
-            $('.nav-tabs').append("<li " + ((i == 0) ? "class='active'": '') + "><a data-toggle='tab' data-conversation-id='" + conversation.id + "' href='#conversation-" + conversation.id + "'>" + ((conversation.userA.id == myID) ? conversation.userB.username : conversation.userA.username) + "</a></li>");
+            $('.nav-tabs').append("<li " + ((i == 0) ? "class='active'": '') + "><a data-toggle='tab' data-conversation-id='" + conversation.id + "' href='#conversation-" + conversation.id + "'>" + ((conversation.userA.id == myID) ? conversation.userB.username : conversation.userA.username) + " <span class='message-count'></span></a></li>");
                               
 
             if(i == 0)
@@ -194,4 +241,11 @@ function getCurrentDate()
     var curr_min = d.getMinutes();
     var curr_sec = d.getSeconds();
     return curr_year + "-" + ((curr_month < 10) ? '0' : '') + curr_month + "-" + ((curr_date < 10) ? '0' : '') + curr_date + " " + ((curr_hour < 10) ? '0' : '') + curr_hour + ":" + curr_min + ":" + ((curr_sec < 10) ? '0' : '') + curr_sec;
+}
+
+
+function format(message)
+{
+    //Alle \n's mit <br> replacen
+    
 }
