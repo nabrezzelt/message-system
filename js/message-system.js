@@ -110,7 +110,7 @@ $(document).on('keydown', 'textarea[data-conversation-id]', function (e){
     }
 });
 
-$(document).ready(function() {  
+$(document).ready(function() {     
     var myID = $(".user-data").data('id');        
 
     $.get("ajax.php?act=all-conversations", function (data) {        
@@ -181,7 +181,7 @@ $(document).on('click', '.btn-send', function() {
             {
                 console.log(data);
 
-                $("#conversation-" + conversationID + " .chat-container").append("<div class='my-message'>" + format(msg) + "<div class='message-data text-right text-muted'><span class='glyphicon glyphicon-time'></span> " + getCurrentDate() + "</div></div>");
+                $("#conversation-" + conversationID + " .chat-container").append("<div class='my-message'>" + formatLinksAndEmots(msg) + "<div class='message-data text-right text-muted'><span class='glyphicon glyphicon-time'></span> " + getCurrentDate() + "</div></div>");
 
                 $("textarea[data-conversation-id='" + conversationID + "']").val("");
                 $("button[data-conversation-id='" + conversationID + "']").addClass('disabled');
@@ -197,7 +197,7 @@ $(document).on('click', '.btn-send', function() {
 });
 
 
-$(document).on('input', '[data-conversation-id]', function() {
+$(document).on('input', '[data-conversation-id]', function() {        
     var conversationID = $(this).data('conversation-id');
 
     if($(this).val() != "")
@@ -220,11 +220,11 @@ function formatMessages(messageData, myID)
         
         if(message.user.id == myID)
         {
-            messages += ("<div class='my-message'>" + format(message.content) + "<div class='message-data text-right text-muted'><span class='glyphicon glyphicon-time'></span> " + message.createTime + "</div></div>");                          
+            messages += ("<div class='my-message'>" + formatLinksAndEmots(message.content) + "<div class='message-data text-right text-muted'><span class='glyphicon glyphicon-time'></span> " + message.createTime + "</div></div>");                          
         } 
         else
         {
-            messages += ("<div class='other-message'>" + format(message.content) + "<div class='message-data-other text-right text-muted'><span class='glyphicon glyphicon-time'></span> " + message.createTime + "</div></div>"); 
+            messages += ("<div class='other-message'>" + formatLinksAndEmots(message.content) + "<div class='message-data-other text-right text-muted'><span class='glyphicon glyphicon-time'></span> " + message.createTime + "</div></div>"); 
         }                                                                
     }        
     return messages;
@@ -244,7 +244,7 @@ function getCurrentDate()
 }
 
 
-function format(message)
+function formatLinksAndEmots(message)
 {
     //Alle \n's mit <br> replacen
     message = message.replace('\n', '<br />');
