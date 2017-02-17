@@ -181,7 +181,7 @@ $(document).on('click', '.btn-send', function() {
             {
                 console.log(data);
 
-                $("#conversation-" + conversationID + " .chat-container").append("<div class='my-message'>" + msg + "<div class='message-data text-right text-muted'><span class='glyphicon glyphicon-time'></span> " + getCurrentDate() + "</div></div>");
+                $("#conversation-" + conversationID + " .chat-container").append("<div class='my-message'>" + format(msg) + "<div class='message-data text-right text-muted'><span class='glyphicon glyphicon-time'></span> " + getCurrentDate() + "</div></div>");
 
                 $("textarea[data-conversation-id='" + conversationID + "']").val("");
                 $("button[data-conversation-id='" + conversationID + "']").addClass('disabled');
@@ -220,11 +220,11 @@ function formatMessages(messageData, myID)
         
         if(message.user.id == myID)
         {
-            messages += ("<div class='my-message'>" + message.content + "<div class='message-data text-right text-muted'><span class='glyphicon glyphicon-time'></span> " + message.createTime + "</div></div>");                          
+            messages += ("<div class='my-message'>" + format(message.content) + "<div class='message-data text-right text-muted'><span class='glyphicon glyphicon-time'></span> " + message.createTime + "</div></div>");                          
         } 
         else
         {
-            messages += ("<div class='other-message'>" + message.content + "<div class='message-data-other text-right text-muted'><span class='glyphicon glyphicon-time'></span> " + message.createTime + "</div></div>"); 
+            messages += ("<div class='other-message'>" + format(message.content) + "<div class='message-data-other text-right text-muted'><span class='glyphicon glyphicon-time'></span> " + message.createTime + "</div></div>"); 
         }                                                                
     }        
     return messages;
@@ -247,5 +247,184 @@ function getCurrentDate()
 function format(message)
 {
     //Alle \n's mit <br> replacen
+    message = message.replace('\n', '<br />');
+
+    var ImgExpr  = /((?:(?:https?:\/\/))[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b(?:[-a-zA-Z0-9@:%_\+.~#?&\/=]*(\.jpg|\.png|\.jpeg|\.gif)))/g;
+    var YTExpr   = /(((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)([^'\s])?)/g;
+    // var LinkExpr = /[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g;
+
+    message = message.replace(ImgExpr, "<img class='img-responsive' src='$1'/>");
+
+    var ytMatches = YTExpr.exec(message); 
+    try 
+    {
+        var ytURL = ytMatches[0];
+        message = message.replace(ytURL, YouTubeUrlNormalize(ytURL));
+        message = message.replace(YTExpr, "<div class='embed-responsive embed-responsive-16by9'><iframe class='embed-responsive-item' src='$1' allowfullscreen></iframe></div>");
+    }
+    catch (error) { }   
     
+
+
+    // var myId = getId('https://youtu.be/Nk-MY7MWNmE');
+
+    // $('#myId').html(myId);
+
+    // $('#myCode').html('<iframe width="560" height="315" src="//www.youtube.com/embed/' + myId + '" frameborder="0" allowfullscreen></iframe>');
+
+
+
+
+
+     
+
+    // //Passe YT-Links an    
+    // var ytMatches = message.match(YTExpr); 
+
+    // for (var i = 0; i < ytMatches.length; i++) 
+    // {
+    //     var ytURL = ytMatches[i];
+    //     message.replace(ytURL, YouTubeUrlNormalize(ytURL));    
+    // }
+
+    // //Setze Imgs
+    // message = message.replace(YTExpr, "<div class='embed-responsive embed-responsive-16by9'><iframe class='embed-responsive-item' src='$1' allowfullscreen></iframe></div>");
+    // var found = message.match(LinkExpr);
+
+    // console.log("Found:");
+    // console.log(found);
+
+    // /(?:(?:https?:\/\/))[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b(?:[-a-zA-Z0-9@:%_\+.~#?&\/=]*(\.jpg|\.png|\.jpeg))/g
+    // [(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/=]*)
+
+    return message;
 }
+
+
+// https://www.youtube.com/watch?v=Nk-MY7MWNmE
+// https://youtu.be/Nk-MY7MWNmE
+// https://www.youtube.com/embed/Nk-MY7MWNmE
+
+// [(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*) (['])([(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))(['])
+
+
+
+var getVidId = function(url)
+{
+    var vidId;
+    if(url.indexOf("youtube.com/watch?v=") !== -1)//https://m.youtube.com/watch?v=e3S9KINoH2M
+    {
+        vidId = url.substr(url.indexOf("youtube.com/watch?v=") + 20);
+    }
+    else if(url.indexOf("youtube.com/watch/?v=") !== -1)//https://m.youtube.com/watch/?v=e3S9KINoH2M
+    {
+        vidId = url.substr(url.indexOf("youtube.com/watch/?v=") + 21);
+    }
+    else if(url.indexOf("youtu.be") !== -1)
+    {
+        vidId = url.substr(url.indexOf("youtu.be") + 9);
+    }
+    else if(url.indexOf("www.youtube.com/embed/") !== -1)
+    {
+        vidId = url.substr(url.indexOf("www.youtube.com/embed/") + 22);
+    }
+    else if(url.indexOf("?v=") !== -1)// http://m.youtube.com/?v=tbBTNCfe1Bc
+    {
+        vidId = url.substr(url.indexOf("?v=")+3, 11);
+    }
+    else
+    {
+        console.warn("YouTubeUrlNormalize getVidId not a youTube Video: "+url);
+        vidId = null;
+    }
+
+    if(vidId.indexOf("&") !== -1)
+    {
+        vidId = vidId.substr(0, vidId.indexOf("&") );
+    }
+    return vidId;
+};
+
+var YouTubeUrlNormalize = function(url)
+{
+    var rtn = url;
+    if(url)
+    {
+        var vidId = getVidId(url);
+        if(vidId)
+        {
+            rtn = "https://www.youtube.com/embed/"+vidId;
+        }
+        else
+        {
+            rtn = url;
+        }
+    }
+
+    return rtn;
+};
+
+YouTubeUrlNormalize.getThumbnail = function(url, num)
+{
+    var rtn, vidId = getVidId(url);
+    if(vidId)
+    {
+        if(!isNaN(num) && num <= 4 && num >= 0)
+        {
+            rtn = "http://img.youtube.com/vi/"+vidId+"/"+num+".jpg";
+        }
+        else
+        {
+            rtn = "http://img.youtube.com/vi/"+getVidId(url)+"/default.jpg";
+        }
+    }
+    else
+    {
+        return null;
+    }
+    return rtn;
+};
+
+YouTubeUrlNormalize.getFullImage = function(url)
+{
+    var vidId = getVidId(url);
+    if(vidId)
+    {
+        return "http://img.youtube.com/vi/"+vidId+"/0.jpg";
+    }
+    else
+    {
+        return null;
+    }
+};
+
+if ( typeof exports !== "undefined" ) {
+    module.exports = YouTubeUrlNormalize;
+}
+else if ( typeof define === "function" ) {
+    define( function () {
+        return YouTubeUrlNormalize;
+    } );
+}
+else {
+    window.YouTubeUrlNormalize = YouTubeUrlNormalize;
+}
+
+
+
+
+
+
+
+
+// function getYoutubeVideoID(url) {
+//     var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+//     var match = url.match(regExp);
+
+//     if (match && match[2].length == 11) {
+//         return match[2];
+//     } else {
+//         return 'error';
+//     }
+// }
+
