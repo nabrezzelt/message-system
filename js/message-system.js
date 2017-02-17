@@ -50,7 +50,7 @@ window.setInterval(function(){
                 console.log(data);
                 if(data.newMessages > 0)
                 {
-                    $("a[data-conversation-id='" + data.conversationID + "'] .message-count").html("<span class='badge'>" + data.newMessages + "</span>");
+                    $("a[data-conversation-id='" + data.conversationID + "'] .message-count").html("<span class='badge'>" + data.newMessages + "</span>");                    
                 }
             }, 'json');
         }
@@ -110,7 +110,7 @@ $(document).on('keydown', 'textarea[data-conversation-id]', function (e){
     }
 });
 
-$(document).ready(function() {
+$(document).ready(function() {  
     var myID = $(".user-data").data('id');        
 
     $.get("ajax.php?act=all-conversations", function (data) {        
@@ -251,6 +251,7 @@ function format(message)
 
     var ImgExpr  = /((?:(?:https?:\/\/))[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b(?:[-a-zA-Z0-9@:%_\+.~#?&\/=]*(\.jpg|\.png|\.jpeg|\.gif)))/g;
     var YTExpr   = /(((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)([^'\s])?)/g;
+    var LinkExpr = /(['])?([(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*)(['])?/g
     // var LinkExpr = /[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g;
 
     message = message.replace(ImgExpr, "<img class='img-responsive' src='$1'/>");
@@ -264,49 +265,25 @@ function format(message)
     }
     catch (error) { }   
     
+    var found = message.match(LinkExpr);
+    console.log(found);
+    try {
+        for (var i = 0; i < found.length; i++) {
+            var link = found[i];
+            console.log(link);
+            if(!link.startsWith("'") && !link.endsWith("'"))
+            {
+                
+                message = message.replace(message, "<a href='" + link + "'>" + link + "</a>");
 
-
-    // var myId = getId('https://youtu.be/Nk-MY7MWNmE');
-
-    // $('#myId').html(myId);
-
-    // $('#myCode').html('<iframe width="560" height="315" src="//www.youtube.com/embed/' + myId + '" frameborder="0" allowfullscreen></iframe>');
-
-
-
-
-
-     
-
-    // //Passe YT-Links an    
-    // var ytMatches = message.match(YTExpr); 
-
-    // for (var i = 0; i < ytMatches.length; i++) 
-    // {
-    //     var ytURL = ytMatches[i];
-    //     message.replace(ytURL, YouTubeUrlNormalize(ytURL));    
-    // }
-
-    // //Setze Imgs
-    // message = message.replace(YTExpr, "<div class='embed-responsive embed-responsive-16by9'><iframe class='embed-responsive-item' src='$1' allowfullscreen></iframe></div>");
-    // var found = message.match(LinkExpr);
-
-    // console.log("Found:");
-    // console.log(found);
-
-    // /(?:(?:https?:\/\/))[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b(?:[-a-zA-Z0-9@:%_\+.~#?&\/=]*(\.jpg|\.png|\.jpeg))/g
-    // [(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/=]*)
+            }            
+        }
+    } catch (error) {
+        
+    }
 
     return message;
 }
-
-
-// https://www.youtube.com/watch?v=Nk-MY7MWNmE
-// https://youtu.be/Nk-MY7MWNmE
-// https://www.youtube.com/embed/Nk-MY7MWNmE
-
-// [(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*) (['])([(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))(['])
-
 
 
 var getVidId = function(url)
@@ -409,22 +386,3 @@ else if ( typeof define === "function" ) {
 else {
     window.YouTubeUrlNormalize = YouTubeUrlNormalize;
 }
-
-
-
-
-
-
-
-
-// function getYoutubeVideoID(url) {
-//     var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-//     var match = url.match(regExp);
-
-//     if (match && match[2].length == 11) {
-//         return match[2];
-//     } else {
-//         return 'error';
-//     }
-// }
-
